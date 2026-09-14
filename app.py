@@ -81,8 +81,13 @@ def fetch_stock_price(ticker):
 
 current_ticker = st.session_state.company_ticker.upper()
 stock_price = fetch_stock_price(current_ticker)
+
 vested_market_value = st.session_state.vested_shares * stock_price
-max_loan_capacity = vested_market_value * 0.35
+unvested_market_value = st.session_state.unvested_shares * stock_price
+total_equity_value = vested_market_value + unvested_market_value
+
+# 35% underwriting cap applied across both vested and unvested value
+max_loan_capacity = total_equity_value * 0.35
 
 # --- Top Title ---
 st.markdown('<h1 style="font-family: \'Urbanist\', sans-serif; font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">Prequalification <span style="color: var(--accent-green);">Tool</span></h1>', unsafe_allow_html=True)
@@ -92,7 +97,7 @@ st.subheader("Your Estimated Liquidity Summary")
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Current Share Price", f"${stock_price:,.2f}")
-col2.metric("Gross Vested Value", f"${vested_market_value:,.2f}")
+col2.metric("Total Equity Value (Vested + Unvested)", f"${total_equity_value:,.2f}")
 col3.metric("Max Loan Capacity (35% Cap)", f"${max_loan_capacity:,.2f}")
 
 st.markdown("<br>", unsafe_allow_html=True)
