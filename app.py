@@ -1,4 +1,6 @@
 import datetime
+import smtplib
+from email.message import EmailMessage
 import streamlit as st
 import yfinance as yf
 
@@ -57,17 +59,18 @@ st.markdown("""
             width: 100%;
         }
         .stButton>button:hover {
-            background-button-color: var(--accent-green-hover);
+            background-color: var(--accent-green-hover);
         }
     </style>
 """, unsafe_allow_html=True)
 
-# --- Initialize Session State with 500 starting shares ---
+# --- Initialize Session State ---
 if 'client_name' not in st.session_state: st.session_state.client_name = "Jane Doe"
 if 'client_email' not in st.session_state: st.session_state.client_email = "jane@company.com"
 if 'company_ticker' not in st.session_state: st.session_state.company_ticker = "GOOGL"
 if 'vested_shares' not in st.session_state: st.session_state.vested_shares = 500
 if 'unvested_shares' not in st.session_state: st.session_state.unvested_shares = 500
+if 'submitted' not in st.session_state: st.session_state.submitted = False
 
 # --- Core Logic ---
 @st.cache_data
@@ -85,51 +88,100 @@ stock_price = fetch_stock_price(current_ticker)
 vested_market_value = st.session_state.vested_shares * stock_price
 unvested_market_value = st.session_state.unvested_shares * stock_price
 total_equity_value = vested_market_value + unvested_market_value
-
-# 35% underwriting cap applied across both vested and unvested value
 max_loan_capacity = total_equity_value * 0.35
 
-# --- Top Title ---
-st.markdown('<h1 style="font-family: \'Urbanist\', sans-serif; font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">Prequalification <span style="color: var(--accent-green);">Estimator</span></h1>', unsafe_allow_html=True)
-
-# --- Liquidity Summary Section (Immediately Below Title) ---
-st.subheader("Your Liquidity Summary")
-
-col1, col2, col3 = st.columns(3)
-col1.metric("Current Share Price", f"${stock_price:,.2f}")
-col2.metric("Total Equity Value (Vested + Unvested)", f"${total_equity_value:,.2f}")
-col3.metric("Max Loan Capacity (35% Cap)", f"${max_loan_capacity:,.2f}")
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-# --- Inputs Section ("Your Details") ---
-st.subheader("Your Details")
-
-form_col1, form_col2 = st.columns(2)
-
-with form_col1:
-    st.session_state.client_name = st.text_input("Full Name", st.session_state.client_name)
-    st.session_state.client_email = st.text_input("Work Email", st.session_state.client_email)
-    st.session_state.company_ticker = st.text_input("Company Ticker", st.session_state.company_ticker).upper()
+def send_notification_email(name, email, ticker, vested, unvested, max_loan):
+    """Sends email notification to RSUnits upon submission."""
+    # Configure your SMTP credentials or email provider API here
+    # Example using standard library smtplib:
+    msg = EmailMessage()
+    msg.set_content(
+        f"New Prequalification Submission:\n\n"
+        f"Name: {name}\n"
+        f"Email: {email}\n"
+        f"Ticker: {ticker}\n"
+        f"Vested Shares: {vested}\n"
+        f"Unvested Shares: {unvested}\n"
+        f"Max Loan Capacity: ${max_loan:,.2f}"
+    )
+    msg['Subject'] = f"New RSU Prequalification Lead: {name}"
+    msg['From'] = "app@yourdomain.com"
+    msg['To'] = "RSUnits@yourdomain.com"
     
-with form_col2:
-    vested_str = st.text_input("Total Vested Shares", value=str(int(st.session_state.vested_shares)))
     try:
-        st.session_state.vested_shares = float(vested_str) if vested_str else 0.0
-    except ValueError:
-        st.session_state.vested_shares = 0.0
+        # Replace with your SMTP server details
+        # server = smtplib.SMTP('smtp.yourserver.com', 587)
+        # server.starttls()
+        # server.login('user', 'password')
+        # server.send_message(msg)
+        # server.quit()
+        pass
+    except Exception as e:
+        print(f"Email failed to send: {e}")
 
-    unvested_str = st.text_input("Total Unvested Shares", value=str(int(st.session_state.unvested_shares)))
-    try:
-        st.session_state.unvested_shares = float(unvested_str) if unvested_str else 0.0
-    except ValueError:
-        st.session_state.unvested_shares = 0.0
+# --- Render Success Page View or Calculator View ---
+if st.session_state.submitted:
+    st.markdown('<h1 style="font-family: \'Urbanist\', sans-serif; font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">Submission <span style="color: var(--accent-green);">Successful</span></h1>', unsafe_allow_html=True)
+    st.markdown("---")
+    st.success(f"Thank you, {st.session_state.client_name}! Your prequalification profile for up to **${max_loan_capacity:,.2f}** has been successfully submitted to RSUnits.")
+    st.markdown(f"Our underwriting team will review your details and contact you shortly at **{st.session_state.client_email}**.")
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("Calculate Another Estimate"):
+        st.session_state.submitted = False
+        st.rerun()
 
-st.markdown("<br>", unsafe_allow_html=True)
+else:
+    # --- Top Title ---
+    st.markdown('<h1 style="font-family: \'Urbanist\', sans-serif; font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">Prequalification <span style="color: var(--accent-green);">Estimator</span></h1>', unsafe_allow_html=True)
 
-# --- Prequalification Action Button ---
-if st.button("Submit for Prequalification"):
-    if not st.session_state.client_name or not st.session_state.client_email:
-        st.error("Please provide your name and work email to submit your prequalification request.")
-    else:
-        st.success(f"Thank you, {st.session_state.client_name}! Your prequalification profile for up to ${max_loan_capacity:,.2f} has been submitted. Our team will contact you at {st.session_state.client_email} shortly.")
+    # --- Liquidity Summary Section ---
+    st.subheader("Your Liquidity Summary")
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Current Share Price", f"${stock_price:,.2f}")
+    col2.metric("Total Equity Value (Vested + Unvested)", f"${total_equity_value:,.2f}")
+    col3.metric("Max Loan Capacity (35% Cap)", f"${max_loan_capacity:,.2f}")
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- Inputs Section ---
+    st.subheader("Your Details")
+
+    form_col1, form_col2 = st.columns(2)
+
+    with form_col1:
+        st.session_state.client_name = st.text_input("Full Name", st.session_state.client_name)
+        st.session_state.client_email = st.text_input("Work Email", st.session_state.client_email)
+        st.session_state.company_ticker = st.text_input("Company Ticker", st.session_state.company_ticker).upper()
+        
+    with form_col2:
+        vested_str = st.text_input("Total Vested Shares", value=str(int(st.session_state.vested_shares)))
+        try:
+            st.session_state.vested_shares = float(vested_str) if vested_str else 0.0
+        except ValueError:
+            st.session_state.vested_shares = 0.0
+
+        unvested_str = st.text_input("Total Unvested Shares", value=str(int(st.session_state.unvested_shares)))
+        try:
+            st.session_state.unvested_shares = float(unvested_str) if unvested_str else 0.0
+        except ValueError:
+            st.session_state.unvested_shares = 0.0
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # --- Prequalification Action Button ---
+    if st.button("Submit for Prequalification"):
+        if not st.session_state.client_name or not st.session_state.client_email:
+            st.error("Please provide your name and work email to submit your prequalification request.")
+        else:
+            send_notification_email(
+                st.session_state.client_name,
+                st.session_state.client_email,
+                st.session_state.company_ticker,
+                st.session_state.vested_shares,
+                st.session_state.unvested_shares,
+                max_loan_capacity
+            )
+            st.session_state.submitted = True
+            st.rerun()
