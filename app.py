@@ -3,7 +3,7 @@ import streamlit as st
 import yfinance as yf
 
 # --- Page Configuration & Styling ---
-st.set_page_config(page_title="RSU Prequalification Tool", layout="wide")
+st.set_page_config(page_title="Prequalification Estimator", layout="wide")
 
 st.markdown("""
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,17 +57,17 @@ st.markdown("""
             width: 100%;
         }
         .stButton>button:hover {
-            background-color: var(--accent-green-hover);
+            background-button-color: var(--accent-green-hover);
         }
     </style>
 """, unsafe_allow_html=True)
 
-# --- Initialize Session State ---
+# --- Initialize Session State with 500 starting shares ---
 if 'client_name' not in st.session_state: st.session_state.client_name = "Jane Doe"
 if 'client_email' not in st.session_state: st.session_state.client_email = "jane@company.com"
 if 'company_ticker' not in st.session_state: st.session_state.company_ticker = "GOOGL"
-if 'vested_shares' not in st.session_state: st.session_state.vested_shares = 1000
-if 'unvested_shares' not in st.session_state: st.session_state.unvested_shares = 1500
+if 'vested_shares' not in st.session_state: st.session_state.vested_shares = 500
+if 'unvested_shares' not in st.session_state: st.session_state.unvested_shares = 500
 
 # --- Core Logic ---
 @st.cache_data
@@ -90,7 +90,7 @@ total_equity_value = vested_market_value + unvested_market_value
 max_loan_capacity = total_equity_value * 0.35
 
 # --- Top Title ---
-st.markdown('<h1 style="font-family: \'Urbanist\', sans-serif; font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">Prequalification <span style="color: var(--accent-green);">Tool</span></h1>', unsafe_allow_html=True)
+st.markdown('<h1 style="font-family: \'Urbanist\', sans-serif; font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">Prequalification <span style="color: var(--accent-green);">Estimator</span></h1>', unsafe_allow_html=True)
 
 # --- Liquidity Summary Section (Immediately Below Title) ---
 st.subheader("Your Estimated Liquidity Summary")
@@ -113,8 +113,18 @@ with form_col1:
     st.session_state.company_ticker = st.text_input("Company Ticker", st.session_state.company_ticker).upper()
     
 with form_col2:
-    st.session_state.vested_shares = st.number_input("Total Vested Shares", value=int(st.session_state.vested_shares), step=50)
-    st.session_state.unvested_shares = st.number_input("Total Unvested Shares", value=int(st.session_state.unvested_shares), step=50)
+    # Using text_input formatted as a free-form number box to eliminate the +/- increment stepper widget
+    vested_str = st.text_input("Total Vested Shares", value=str(int(st.session_state.vested_shares)))
+    try:
+        st.session_state.vested_shares = float(vested_str) if vested_str else 0.0
+    except ValueError:
+        st.session_state.vested_shares = 0.0
+
+    unvested_str = st.text_input("Total Unvested Shares", value=str(int(st.session_state.unvested_shares)))
+    try:
+        st.session_state.unvested_shares = float(unvested_str) if unvested_str else 0.0
+    except ValueError:
+        st.session_state.unvested_shares = 0.0
 
 st.markdown("<br>", unsafe_allow_html=True)
 
