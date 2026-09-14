@@ -93,7 +93,7 @@ max_loan_capacity = total_equity_value * 0.35
 st.markdown('<h1 style="font-family: \'Urbanist\', sans-serif; font-size: 2.5rem; font-weight: 800; color: #ffffff; margin-bottom: 1rem;">Prequalification <span style="color: var(--accent-green);">Estimator</span></h1>', unsafe_allow_html=True)
 
 # --- Liquidity Summary Section (Immediately Below Title) ---
-st.subheader("Your Estimated Liquidity Summary")
+st.subheader("Your Liquidity Summary")
 
 col1, col2, col3 = st.columns(3)
 col1.metric("Current Share Price", f"${stock_price:,.2f}")
@@ -113,7 +113,6 @@ with form_col1:
     st.session_state.company_ticker = st.text_input("Company Ticker", st.session_state.company_ticker).upper()
     
 with form_col2:
-    # Using text_input formatted as a free-form number box to eliminate the +/- increment stepper widget
     vested_str = st.text_input("Total Vested Shares", value=str(int(st.session_state.vested_shares)))
     try:
         st.session_state.vested_shares = float(vested_str) if vested_str else 0.0
