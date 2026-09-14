@@ -17,8 +17,8 @@ st.markdown("""
             --border-color: #262626;
             --text-primary: #ffffff;
             --text-secondary: #a3a3a3;
-            --accent-green: #a3e635;
-            --accent-green-hover: #bef264;
+            --accent-green: #bae655;
+            --accent-green-hover: #cbf06f;
         }
         
         .stApp {
@@ -63,15 +63,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("RSU Liquidity & Prequalification Tool")
-st.markdown("Estimate your non-dilutive borrowing capacity against vested tech equity and submit for instant prequalification.")
+st.markdown("Adjust your equity details below to watch your borrowing capacity update instantly in real time.")
 st.markdown("---")
-
-# --- Initialize Session State ---
-if 'client_name' not in st.session_state: st.session_state.client_name = ""
-if 'client_email' not in st.session_state: st.session_state.client_email = ""
-if 'company_ticker' not in st.session_state: st.session_state.company_ticker = "GOOGL"
-if 'vested_shares' not in st.session_state: st.session_state.vested_shares = 1000
-if 'unvested_shares' not in st.session_state: st.session_state.unvested_shares = 1500
 
 # --- Core Logic ---
 @st.cache_data
@@ -83,13 +76,28 @@ def fetch_stock_price(ticker):
     except:
         return 175.50
 
-stock_price = fetch_stock_price(st.session_state.company_ticker)
+# --- Inputs Section (Placed outside a form so it updates live on every change) ---
+st.subheader("Customize Your Grant & Borrower Details")
 
-# Calculations (Capped strictly at 35% max LTV)
-vested_market_value = st.session_state.vested_shares * stock_price
+form_col1, form_col2 = st.columns(2)
+
+with form_col1:
+    client_name = st.text_input("Full Name", "Jane Doe")
+    client_email = st.text_input("Work Email", "jane@company.com")
+    company_ticker = st.text_input("Company Ticker", "GOOGL").upper()
+    
+with form_col2:
+    vested_shares = st.number_input("Total Vested Shares", value=1000, step=50)
+    unvested_shares = st.number_input("Total Unvested Shares", value=1500, step=50)
+
+# Fetch live stock price and calculate values dynamically as inputs change
+stock_price = fetch_stock_price(company_ticker)
+vested_market_value = vested_shares * stock_price
 max_loan_capacity = vested_market_value * 0.35
 
-# --- Top Section: Live Outputs & Results ---
+st.markdown("---")
+
+# --- Top Section: Live Outputs & Results (Reacts instantly) ---
 st.subheader("Your Estimated Liquidity Summary")
 
 col1, col2, col3 = st.columns(3)
@@ -99,25 +107,10 @@ col3.metric("Max Loan Capacity (35% Cap)", f"${max_loan_capacity:,.2f}")
 
 st.markdown("---")
 
-# --- Bottom Section: Inputs & Prequalification Form ---
-st.subheader("Customize & Submit for Prequalification")
-
-with st.form("prequal_form"):
-    form_col1, form_col2 = st.columns(2)
-    
-    with form_col1:
-        st.session_state.client_name = st.text_input("Full Name", placeholder="Jane Doe")
-        st.session_state.client_email = st.text_input("Work Email", placeholder="jane@company.com")
-        st.session_state.company_ticker = st.text_input("Company Ticker", st.session_state.company_ticker).upper()
-        
-    with form_col2:
-        st.session_state.vested_shares = st.number_input("Total Vested Shares", value=st.session_state.vested_shares, step=50)
-        st.session_state.unvested_shares = st.number_input("Total Unvested Shares", value=st.session_state.unvested_shares, step=50)
-        st.markdown("<br>", unsafe_allow_html=True)
-        submitted = st.form_submit_button("Submit for Prequalification")
-
-if submitted:
-    if not st.session_state.client_name or not st.session_state.client_email:
+# --- Prequalification Action Button ---
+if st.button("Submit for Prequalification"):
+    if not client_name or not client_email:
         st.error("Please provide your name and work email to submit your prequalification request.")
     else:
-        st.success(f"Thank you, {st.session_state.client_name}! Your prequalification profile for up to ${max_loan_capacity:,.2f} has been submitted. Our team will contact you at {st.session_state.client_email} shortly.")
+        st.success(f"Thank you, {client_name}! Your prequalification profile for up to ${max_loan_capacity:,.2f} has been submitted. Our team will contact you at {client_email} shortly.")
+
