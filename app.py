@@ -185,3 +185,10 @@ else:
             )
             st.session_state.submitted = True
             st.rerun()
+
+        /* Hide Streamlit Header, Footer, and Menu */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        .viewerBadge_link__1S137 {display: none;}
+
