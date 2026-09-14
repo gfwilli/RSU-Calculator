@@ -61,6 +61,12 @@ st.markdown("""
         .stButton>button:hover {
             background-color: var(--accent-green-hover);
         }
+
+        /* Hide Streamlit Header, Footer, and Menu */
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+        header {visibility: hidden;}
+        .viewerBadge_link__1S137 {display: none;}
     </style>
 """, unsafe_allow_html=True)
 
@@ -88,12 +94,12 @@ stock_price = fetch_stock_price(current_ticker)
 vested_market_value = st.session_state.vested_shares * stock_price
 unvested_market_value = st.session_state.unvested_shares * stock_price
 total_equity_value = vested_market_value + unvested_market_value
+
+# 35% underwriting cap applied across both vested and unvested value
 max_loan_capacity = total_equity_value * 0.35
 
 def send_notification_email(name, email, ticker, vested, unvested, max_loan):
     """Sends email notification to RSUnits upon submission."""
-    # Configure your SMTP credentials or email provider API here
-    # Example using standard library smtplib:
     msg = EmailMessage()
     msg.set_content(
         f"New Prequalification Submission:\n\n"
@@ -109,12 +115,7 @@ def send_notification_email(name, email, ticker, vested, unvested, max_loan):
     msg['To'] = "RSUnits@yourdomain.com"
     
     try:
-        # Replace with your SMTP server details
-        # server = smtplib.SMTP('smtp.yourserver.com', 587)
-        # server.starttls()
-        # server.login('user', 'password')
-        # server.send_message(msg)
-        # server.quit()
+        # Configure your SMTP server details here in production
         pass
     except Exception as e:
         print(f"Email failed to send: {e}")
@@ -145,7 +146,7 @@ else:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- Inputs Section ---
+    # --- Inputs Section ("Your Details") ---
     st.subheader("Your Details")
 
     form_col1, form_col2 = st.columns(2)
@@ -185,10 +186,3 @@ else:
             )
             st.session_state.submitted = True
             st.rerun()
-
-        /* Hide Streamlit Header, Footer, and Menu */
-        #MainMenu {visibility: hidden;}
-        footer {visibility: hidden;}
-        header {visibility: hidden;}
-        .viewerBadge_link__1S137 {display: none;}
-
