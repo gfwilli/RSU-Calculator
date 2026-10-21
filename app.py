@@ -7,27 +7,43 @@ st.set_page_config(
     layout="centered"
 )
 
-# Custom Styling & UI Chrome Removal
+# Custom Styling & UI Chrome Removal + Brand Colors
 st.markdown(
     """
     <style>
-    /* Hide the Streamlit footer, menu, and GitHub badge */
+    /* Hide Streamlit branding, footer, and menu */
     footer {visibility: hidden;}
     .stDeployButton {display: none;}
     #MainMenu {visibility: hidden;}
     .viewerBadge_container__1QSob {display: none !important;}
     
-    /* Overall Theme Tweaks */
-    .main {
+    /* Global Background */
+    .stApp {
         background-color: #0b0b0b;
         color: #ffffff;
     }
-    .metric-card {
-        background-color: #141414;
-        border: 1px solid #262626;
-        padding: 20px;
-        border-radius: 12px;
-        text-align: center;
+    
+    /* Style primary/action buttons to match brand accent green */
+    div.stButton > button {
+        background-color: #a3e635 !important;
+        color: #000000 !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 8px !important;
+        width: 100% !important;
+        padding: 12px !important;
+        transition: background-color 0.3s ease;
+    }
+    div.stButton > button:hover {
+        background-color: #bef264 !important;
+    }
+
+    /* Input fields dark styling */
+    .stTextInput input, .stNumberInput input {
+        background-color: rgba(0, 0, 0, 0.5) !important;
+        color: #ffffff !important;
+        border: 1px solid #262626 !important;
+        border-radius: 8px !important;
     }
     </style>
     """,
@@ -73,7 +89,7 @@ with col_d:
     unvested_shares = st.number_input("Total Unvested Shares", value=250, step=10)
 
 # Calculate advance eligibility action
-if st.button("Calculate Final Terms", type="primary"):
+if st.button("Calculate Final Terms"):
     if not full_name or not email:
         st.warning("Please provide both your name and email to proceed.")
     else:
