@@ -137,4 +137,35 @@ st.subheader("Your Details")
 
 form_col1, form_col2 = st.columns(2)
 with form_col1:
-    st.text_
+    st.text_input("Full Name", key="full_name", placeholder="e.g. Sarah Jenkins")
+with form_col2:
+    st.text_input("Company Ticker", key="company_ticker", placeholder="e.g. GOOGL")
+
+st.text_input("Personal Email Address", key="email", placeholder="sarah.j@gmail.com")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+share_col1, share_col2 = st.columns(2)
+with share_col1:
+    st.number_input("Total Vested Shares", min_value=0, key="vested_shares")
+with share_col2:
+    st.number_input("Total Unvested Shares", min_value=0, key="unvested_shares")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+if st.button("Submit for Prequalification"):
+    if not st.session_state["full_name"] or not st.session_state["email"]:
+        st.error("Please fill in your name and email address.")
+    else:
+        st.session_state["company_ticker"] = st.session_state["company_ticker"].upper()
+        send_notification_email(
+            st.session_state["full_name"],
+            st.session_state["email"],
+            st.session_state["company_ticker"],
+            st.session_state["vested_shares"],
+            st.session_state["unvested_shares"],
+            max_loan_capacity
+        )
+        st.success("Prequalification estimate calculated successfully!")
+        st.session_state["submitted"] = True
+        st.rerun()
