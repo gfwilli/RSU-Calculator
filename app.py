@@ -76,7 +76,8 @@ if "vested_shares" not in st.session_state:
 if "unvested_shares" not in st.session_state:
     st.session_state.unvested_shares = 500
 
-st.title("Prequalification Estimator")
+# Title with restored lime green accent
+st.markdown("<h1>Prequalification <span style='color: var(--accent-green);'>Estimator</span></h1>", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
 # --- Fetch Stock Price ---
@@ -124,21 +125,25 @@ def send_notification_email(name, email, ticker, vested, unvested, max_loan):
 
 # --- Inputs Section ("Your Details") ---
 st.subheader("Your Details")
-form_col1, form_col2 = st.columns(2)
 
+# Row 1: Full Name and Company Ticker side-by-side
+form_col1, form_col2 = st.columns(2)
 with form_col1:
     st.session_state.full_name = st.text_input("Full Name", value=st.session_state.full_name, placeholder="e.g. Sarah Jenkins")
-    # Updated to collect Personal Email Address with a privacy reassurance tip
-    st.session_state.email = st.text_input(
-        "Personal Email Address", 
-        value=st.session_state.email, 
-        placeholder="sarah.j@gmail.com",
-        help="Use your personal email for complete privacy."
-    )
-
 with form_col2:
     st.session_state.company_ticker = st.text_input("Company Ticker", value=st.session_state.company_ticker, placeholder="e.g. GOOGL").upper()
 
+# Row 2: Personal Email Address spanning full width (removes the awkward gap)
+st.session_state.email = st.text_input(
+    "Personal Email Address", 
+    value=st.session_state.email, 
+    placeholder="sarah.j@gmail.com",
+    help="Use your personal email for complete privacy."
+)
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Row 3: Total Vested and Unvested Shares side-by-side
 share_col1, share_col2 = st.columns(2)
 with share_col1:
     st.session_state.vested_shares = st.number_input("Total Vested Shares", min_value=0, value=st.session_state.vested_shares)
@@ -160,5 +165,4 @@ if st.button("Submit for Prequalification"):
             max_loan_capacity
         )
         st.success("Prequalification estimate calculated successfully!")
-        st.session_state.submitted = True
-        st.rerun()
+        st.session_state.
