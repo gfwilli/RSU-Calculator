@@ -23,6 +23,16 @@ st.markdown(
         color: #ffffff;
     }
     
+    /* Title Accent Color Styling (targeting the second word or specific title sections) */
+    h1 span, .stTitle span {
+        color: #a3e635 !important;
+    }
+
+    /* Metric Values Accent Color */
+    [data-testid="stMetricValue"] {
+        color: #a3e635 !important;
+    }
+
     /* Style primary/action buttons to match brand accent green */
     div.stButton > button {
         background-color: #a3e635 !important;
@@ -56,8 +66,8 @@ default_name = query_params.get("name", "")
 default_email = query_params.get("email", "")
 default_ticker = query_params.get("ticker", "GOOGL")
 
-# App Header
-st.title("Prequalification Estimator")
+# App Header with Accent Styling on "Estimator"
+st.markdown('<h1>Prequalification <span style="color: #a3e635;">Estimator</span></h1>', unsafe_allow_html=True)
 st.write("Review your estimated liquidity advance capacity based on upcoming RSU vest schedules.")
 
 # Mock Financial Metrics Display
