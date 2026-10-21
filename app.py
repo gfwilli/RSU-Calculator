@@ -31,7 +31,6 @@ st.markdown(
     }
     </style>
     """,
-    unsafe_allow_init := True,
     unsafe_allow_html=True
 )
 
