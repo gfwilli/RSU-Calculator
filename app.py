@@ -64,14 +64,28 @@ st.markdown("""
 
 # --- Initialize Session State ---
 if "submitted" not in st.session_state:
-    st.session_state.submitted = False
+    st.session_state["submitted"] = False
 if "full_name" not in st.session_state:
-    st.session_state.full_name = ""
+    st.session_state["full_name"] = ""
 if "email" not in st.session_state:
-    st.session_state.email = ""
+    st.session_state["email"] = ""
 if "company_ticker" not in st.session_state:
-    st.session_state.company_ticker = "GOOGL"
+    st.session_state["company_ticker"] = "GOOGL"
 if "vested_shares" not in st.session_state:
-    st.session_state.vested_shares = 250
+    st.session_state["vested_shares"] = 250
 if "unvested_shares" not in st.session_state:
-    st.session_state.unvested_shares =
+    st.session_state["unvested_shares"] = 250
+
+# --- Title Header ---
+st.markdown("<h1>Prequalification <span style='color: var(--accent-green);'>Estimator</span></h1>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
+
+# --- Fetch Stock Price ---
+try:
+    ticker_symbol = st.session_state["company_ticker"]
+    stock = yf.Ticker(ticker_symbol)
+    stock_price = stock.history(period="1d")['Close'].iloc[-1]
+except Exception:
+    stock_price = 340.76  # Fallback price
+
+vested_market_value = st.session_state["vested_shares"] *
