@@ -76,7 +76,7 @@ if "vested_shares" not in st.session_state:
 if "unvested_shares" not in st.session_state:
     st.session_state.unvested_shares = 500
 
-# Title with restored lime green accent
+# Title with lime green accent
 st.markdown("<h1>Prequalification <span style='color: var(--accent-green);'>Estimator</span></h1>", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -129,14 +129,14 @@ st.subheader("Your Details")
 # Row 1: Full Name and Company Ticker side-by-side
 form_col1, form_col2 = st.columns(2)
 with form_col1:
-    st.session_state.full_name = st.text_input("Full Name", value=st.session_state.full_name, placeholder="e.g. Sarah Jenkins")
+    st.text_input("Full Name", key="full_name", placeholder="e.g. Sarah Jenkins")
 with form_col2:
-    st.session_state.company_ticker = st.text_input("Company Ticker", value=st.session_state.company_ticker, placeholder="e.g. GOOGL").upper()
+    st.text_input("Company Ticker", key="company_ticker", placeholder="e.g. GOOGL")
 
-# Row 2: Personal Email Address spanning full width (removes the awkward gap)
-st.session_state.email = st.text_input(
+# Row 2: Personal Email Address spanning full width
+st.text_input(
     "Personal Email Address", 
-    value=st.session_state.email, 
+    key="email", 
     placeholder="sarah.j@gmail.com",
     help="Use your personal email for complete privacy."
 )
@@ -146,9 +146,9 @@ st.markdown("<br>", unsafe_allow_html=True)
 # Row 3: Total Vested and Unvested Shares side-by-side
 share_col1, share_col2 = st.columns(2)
 with share_col1:
-    st.session_state.vested_shares = st.number_input("Total Vested Shares", min_value=0, value=st.session_state.vested_shares)
+    st.number_input("Total Vested Shares", min_value=0, key="vested_shares")
 with share_col2:
-    st.session_state.unvested_shares = st.number_input("Total Unvested Shares", min_value=0, value=st.session_state.unvested_shares)
+    st.number_input("Total Unvested Shares", min_value=0, key="unvested_shares")
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -156,6 +156,8 @@ if st.button("Submit for Prequalification"):
     if not st.session_state.full_name or not st.session_state.email:
         st.error("Please fill in your name and email address.")
     else:
+        # Uppercase ticker just before sending/processing
+        st.session_state.company_ticker = st.session_state.company_ticker.upper()
         send_notification_email(
             st.session_state.full_name,
             st.session_state.email,
@@ -165,4 +167,5 @@ if st.button("Submit for Prequalification"):
             max_loan_capacity
         )
         st.success("Prequalification estimate calculated successfully!")
-        st.session_state.
+        st.session_state.submitted = True
+        st.rerun()
