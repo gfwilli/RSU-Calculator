@@ -137,11 +137,4 @@ st.subheader("Your Details")
 
 form_col1, form_col2 = st.columns(2)
 with form_col1:
-    st.text_input("Full Name", key="full_name", placeholder="e.g. Sarah Jenkins")
-with form_col2:
-    st.text_input("Company Ticker", key="company_ticker", placeholder="e.g. GOOGL")
-
-st.text_input(
-    "Personal Email Address", 
-    key="email", 
-    placeholder
+    st.text_
