@@ -76,6 +76,15 @@ if "vested_shares" not in st.session_state:
 if "unvested_shares" not in st.session_state:
     st.session_state["unvested_shares"] = 250
 
+# --- Check for URL Query Parameters from Home Page ---
+params = st.query_params
+if "name" in params:
+    st.session_state["full_name"] = params["name"]
+if "email" in params:
+    st.session_state["email"] = params["email"]
+if "ticker" in params:
+    st.session_state["company_ticker"] = params["ticker"].upper()
+
 # --- Title Header ---
 st.markdown("<h1>Prequalification <span style='color: var(--accent-green);'>Estimator</span></h1>", unsafe_allow_html=True)
 st.markdown("<br>", unsafe_allow_html=True)
@@ -99,69 +108,4 @@ max_loan_capacity = total_equity_value * 0.35
 col1, col2, col3 = st.columns(3)
 col1.metric("Current Share Price", f"${stock_price:,.2f}")
 col2.metric("Total Equity Value (Vested + Unvested)", f"${total_equity_value:,.2f}")
-col3.metric("Max Loan Capacity (35% Cap)", f"${max_loan_capacity:,.2f}")
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-def send_notification_email(name, email, ticker, vested, unvested, max_loan):
-    """Sends email notification to RSUnits upon submission."""
-    msg = EmailMessage()
-    msg.set_content(
-        f"New Prequalification Submission:\n\n"
-        f"Name: {name}\n"
-        f"Email: {email}\n"
-        f"Ticker: {ticker}\n"
-        f"Vested Shares: {vested}\n"
-        f"Unvested Shares: {unvested}\n"
-        f"Max Loan Capacity: ${max_loan:,.2f}\n"
-    )
-    msg['Subject'] = f"New Prequalification Lead: {name} ({ticker})"
-    msg['From'] = "system@rsunits.com"
-    msg['To'] = "RSUnits@yourdomain.com"
-    try:
-        pass
-    except Exception as e:
-        print(f"Email failed to send: {e}")
-
-# --- Inputs Section ("Your Details") ---
-st.subheader("Your Details")
-
-form_col1, form_col2 = st.columns(2)
-with form_col1:
-    st.text_input("Full Name", key="full_name", placeholder="e.g. Sarah Jenkins")
-with form_col2:
-    st.text_input("Company Ticker", key="company_ticker", placeholder="e.g. GOOGL")
-
-st.text_input(
-    "Personal Email Address", 
-    key="email", 
-    placeholder="sarah.j@gmail.com",
-    help="Use your personal email for complete privacy."
-)
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-share_col1, share_col2 = st.columns(2)
-with share_col1:
-    st.number_input("Total Vested Shares", min_value=0, key="vested_shares")
-with share_col2:
-    st.number_input("Total Unvested Shares", min_value=0, key="unvested_shares")
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-if st.button("Submit for Prequalification"):
-    if not st.session_state["full_name"] or not st.session_state["email"]:
-        st.error("Please fill in your name and email address.")
-    else:
-        st.session_state["company_ticker"] = st.session_state["company_ticker"].upper()
-        send_notification_email(
-            st.session_state["full_name"],
-            st.session_state["email"],
-            st.session_state["company_ticker"],
-            st.session_state["vested_shares"],
-            st.session_state["unvested_shares"],
-            max_loan_capacity
-        )
-        st.success("Prequalification estimate calculated successfully!")
-        st.session_state["submitted"] = True
-        st.rerun()
+col3.metric("Max Loan Capacity
